@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeatPlan | Exam Seating Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <span class="admin-label"><span aria-hidden="true">●</span> Admin <span aria-hidden="true">⌄</span></span>
+</header>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-icon" aria-hidden="true">▣</span>
+            <div>
+                <h1>SeatPlan</h1>
+                <small>Exam Hall Management</small>
+            </div>
+        </div>
+        <p class="nav-heading">WORKSPACE</p>
+        <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
+        <button class="nav-btn" data-page="halls">▤ Exam Halls</button>
+        <button class="nav-btn" data-page="students">♙ Students</button>
+        <button class="nav-btn" data-page="exams">▣ Examinations</button>
+        <button class="nav-btn" data-page="seating">▦ Seating Plan</button>
+        <button class="nav-btn" data-page="lookup">⌕ Find Student</button>
+    </aside>
+
+    <main class="content">
+
+        <section id="dashboard" class="page">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">OVERVIEW</p>
+                    <h2>Dashboard</h2>
+                    <p class="muted">Manage examination seating in one place.</p>
+                </div>
+                <button class="primary" onclick="refreshAll()">
+                    ↻ Refresh
+                </button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card stat-halls">
+                    <span class="stat-icon" aria-hidden="true">▤</span>
+                    <div><span>Registered Halls</span><strong id="hallCount">0</strong><button class="stat-link" data-page="halls">View Halls →</button></div>
+                </div>
+                <div class="stat-card stat-students">
+                    <span class="stat-icon" aria-hidden="true">♟</span>
+                    <div><span>Registered Students</span><strong id="studentCount">0</strong><button class="stat-link" data-page="students">View Students →</button></div>
+                </div>
+                <div class="stat-card stat-exams">
+                    <span class="stat-icon" aria-hidden="true">▣</span>
+                    <div><span>Examinations</span><strong id="examCount">0</strong><button class="stat-link" data-page="exams">View Exams →</button></div>
+                </div>
+                <div class="stat-card stat-allocations">
+                    <span class="stat-icon" aria-hidden="true">▦</span>
+                    <div><span>Allocated Seats</span><strong id="allocationCount">0</strong><button class="stat-link" data-page="seating">View Allocations →</button></div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <section class="panel workflow-panel">
+                    <h3>Quick Workflow</h3>
+                    <ol class="workflow-list">
+                        <li><span class="workflow-number">1</span><div><button data-page="halls">Register exam halls</button><small>Add hall name, rows and columns. Seats are created automatically.</small></div></li>
+                        <li><span class="workflow-number">2</span><div><button data-page="students">Register students</button><small>Add student details with class and section.</small></div></li>
+                        <li><span class="workflow-number">3</span><div><button data-page="exams">Create an examination</button><small>Add the exam name, date and time.</small></div></li>
+                        <li><span class="workflow-number">4</span><div><button data-page="exams">Assign students to exam</button><small>Choose eligible students for an examination.</small></div></li>
+                        <li><span class="workflow-number">5</span><div><button data-page="seating">Generate seating plan</button><small>Allocate seats while avoiding adjacent classmates.</small></div></li>
+                        <li><span class="workflow-number">6</span><div><button data-page="lookup">Find and print</button><small>Look up a student's seat or print a seating chart.</small></div></li>
+                    </ol>
+                </section>
+
+                <section class="panel recent-panel">
+                    <div class="panel-heading">
+                        <h3>Recent Examinations</h3>
+                        <button class="text-link" data-page="exams">View All →</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>ID</th><th>Exam Name</th><th>Date</th><th>Start</th><th>End</th><th>Action</th></tr></thead>
+                            <tbody id="recentExamTable"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div class="feature-grid">
+                <article class="feature-card feature-halls"><span class="feature-icon" aria-hidden="true">▤</span><h3>Manage Exam Halls</h3><p>Add, edit or remove exam halls and manage seating capacity.</p><button class="primary" data-page="halls">Go to Halls</button></article>
+                <article class="feature-card feature-students"><span class="feature-icon" aria-hidden="true">♟</span><h3>Manage Students</h3><p>Register students with class and section details.</p><button class="primary" data-page="students">Go to Students</button></article>
+                <article class="feature-card feature-exams"><span class="feature-icon" aria-hidden="true">▣</span><h3>Manage Examinations</h3><p>Create exams and assign students to examinations.</p><button class="primary" data-page="exams">Go to Exams</button></article>
+                <article class="feature-card feature-seating"><span class="feature-icon" aria-hidden="true">▦</span><h3>Generate Seating Plan</h3><p>Allocate seats automatically and view the seating chart.</p><button class="primary" data-page="seating">Go to Seating Plan</button></article>
+                <article class="feature-card feature-lookup"><span class="feature-icon" aria-hidden="true">⌕</span><h3>Find Student Seat</h3><p>Search for a student's allocated seat in an examination.</p><button class="primary" data-page="lookup">Find Seat</button></article>
+            </div>
+        </section>
+
+        <section id="halls" class="page hidden">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">INFRASTRUCTURE</p>
+                    <h2>Exam Halls</h2>
+                    <p class="muted">Register halls and configure their seating capacity.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Register New Hall</h3>
+                <form id="hallForm" class="form-grid">
+                    <label>
+                        Hall Name
+                        <input name="hallName" required placeholder="Main Hall">
+                    </label>
+                    <label>
+                        Number of Rows
+                        <input name="rowsCount" type="number" min="1"
+                               required placeholder="5">
+                    </label>
+                    <label>
+                        Seats per Row
+                        <input name="columnsCount" type="number" min="1"
+                               required placeholder="6">
+                    </label>
+                    <button class="primary" type="submit">Create Hall</button>
+                </form>
+                <p class="muted small">
+                    Capacity is calculated automatically as rows × columns.
+                </p>
+            </div>
+
+            <div class="panel">
+                <h3>Registered Halls</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hall</th>
+                            <th>Rows</th>
+                            <th>Columns</th>
+                            <th>Capacity</th>
+                        </tr>
+                        </thead>
+                        <tbody id="hallTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="students" class="page hidden">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">STUDENT DIRECTORY</p>
+                    <h2>Students</h2>
+                    <p class="muted">Maintain student records and class details.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Register Student</h3>
+                <form id="studentForm" class="form-grid">
+                    <label>
+                        Register Number
+                        <input name="registerNumber" required
+                               placeholder="23CS001">
+                    </label>
+                    <label>
+                        Student Name
+                        <input name="studentName" required
+                               placeholder="Student name">
+                    </label>
+                    <label>
+                        Class
+                        <input name="className" required placeholder="CSE">
+                    </label>
+                    <label>
+                        Section
+                        <input name="section" required placeholder="A">
+                    </label>
+                    <button class="primary" type="submit">Add Student</button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3>Student Records</h3>
+                    <input id="studentFilter" placeholder="Search students...">
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Register No.</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                        </tr>
+                        </thead>
+                        <tbody id="studentTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="exams" class="page hidden">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">EXAM MANAGEMENT</p>
+                    <h2>Examinations</h2>
+                    <p class="muted">Create exams and register eligible students.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Create Examination</h3>
+                <form id="examForm" class="form-grid">
+                    <label>
+                        Exam Name
+                        <input name="examName" required
+                               placeholder="Data Structures">
+                    </label>
+                    <label>
+                        Exam Date
+                        <input name="examDate" type="date" required>
+                    </label>
+                    <label>
+                        Start Time
+                        <input name="startTime" type="time" required>
+                    </label>
+                    <label>
+                        End Time
+                        <input name="endTime" type="time" required>
+                    </label>
+                    <button class="primary" type="submit">Create Exam</button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h3>Register Students for an Exam</h3>
+                <form id="examStudentsForm">
+                    <label>
+                        Select Examination
+                        <select id="examSelect" required>
+                            <option value="">Choose an exam</option>
+                        </select>
+                    </label>
+
+                    <label class="spaced-label">
+                        Select Students
+                        <select id="studentMultiSelect" multiple size="7">
+                        </select>
+                    </label>
+
+                    <p class="muted small">
+                        Use Ctrl (Windows) or Cmd (Mac) to select multiple
+                        students.
+                    </p>
+
+                    <button class="primary" type="submit">
+                        Register Selected Students
+                    </button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h3>Examination List</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Exam</th>
+                            <th>Date</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                        </thead>
+                        <tbody id="examTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="seating" class="page hidden">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">AUTOMATED ALLOCATION</p>
+                    <h2>Seating Plan</h2>
+                    <p class="muted">
+                        Generate and view the seating arrangement for an exam.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <form id="generateForm" class="inline-form">
+                    <label>
+                        Examination
+                        <select id="generateExamSelect" required>
+                            <option value="">Choose an exam</option>
+                        </select>
+                    </label>
+                    <button class="primary" type="submit">
+                        Generate Seating
+                    </button>
+                    <button class="secondary" type="button"
+                            onclick="printSeating()">
+                        Print Chart
+                    </button>
+                </form>
+                <p class="muted small">
+                    Generate only after assigning students and creating halls.
+                </p>
+            </div>
+
+            <div id="seatingSummary" class="summary"></div>
+            <div id="seatingChart"></div>
+        </section>
+
+        <section id="lookup" class="page hidden">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">QUICK SEARCH</p>
+                    <h2>Find Student Seat</h2>
+                    <p class="muted">
+                        Search for a student's allocated exam seat.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <form id="lookupForm" class="inline-form">
+                    <label>
+                        Register Number
+                        <input id="lookupRegister" required
+                               placeholder="23CS001">
+                    </label>
+                    <label>
+                        Examination
+                        <select id="lookupExamSelect" required>
+                            <option value="">Choose an exam</option>
+                        </select>
+                    </label>
+                    <button class="primary" type="submit">Find Seat</button>
+                </form>
+                <div id="lookupResult"></div>
+            </div>
+        </section>
+
+        <div id="toast" class="toast hidden" role="status"></div>
+
+    </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
